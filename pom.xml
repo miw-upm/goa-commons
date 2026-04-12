@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>es.upm.miw</groupId>
+    <artifactId>goa-commons</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>${project.groupId}.${project.artifactId}</name>
+    <url>https://github.com/miw-upm/${project.artifactId}</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Jesus Bernal</name>
+            <id>J.Bernal</id>
+            <email>j.bernal@upm.es</email>
+            <organization>MIW UPM</organization>
+            <roles>
+                <role>Architect</role>
+                <role>Developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <properties>
+        <!-- Encode -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- Java -->
+        <java.version>21</java.version>
+        <!-- Maven -->
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <!-- Coverage report -->
+        <jacoco.version>0.8.14</jacoco.version>
+        <!-- Official Plugin Sonar -->
+        <sonar-maven-plugin-version>5.5.0.6356</sonar-maven-plugin-version>
+        <!-- Lombok -->
+        <lombok.version>1.18.36</lombok.version>
+        <!-- JUnit -->
+        <junit-jupiter.version>5.11.4</junit-jupiter.version>
+        <assertj.version>3.27.3</assertj.version>
+    </properties>
+
+    <dependencies>
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/miw-upm/${project.artifactId}</url>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <!-- Sonar plugin -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar-maven-plugin-version}</version>
+            </plugin>
+            <!-- Coverage report -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>default-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,48 @@
+name: CD goa-commons
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  cd:
+    name: Publish to GitHub Packages
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ☕ Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
+
+      - name: ✅ Run Tests
+        run: mvn -B verify
+
+      - name: 🚀 Publish package
+        run: mvn -B deploy
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔔 Notify Slack on failure
+        if: failure()
+        uses: 8398a7/action-slack@77eaa4f1c608a7d68b38af4e3f739dcd8cba273e # v3.19.0
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,ref,workflow,
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
