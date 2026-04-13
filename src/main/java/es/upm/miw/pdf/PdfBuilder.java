@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 public class PdfBuilder {
 
@@ -148,6 +149,18 @@ public class PdfBuilder {
         return this;
     }
 
+    public PdfBuilder labelValue(String label, String value) {
+        try {
+            Paragraph p = new Paragraph();
+            p.add(new Chunk(label + ": ", FONT_BOLD));
+            p.add(new Chunk(value, FONT_NORMAL));
+            document.add(p);
+        } catch (DocumentException e) {
+            throw this.onError("adding label-value", e);
+        }
+        return this;
+    }
+
     public PdfBuilder line() {
         try {
             document.add(new Paragraph(new Chunk(new LineSeparator())));
@@ -162,6 +175,31 @@ public class PdfBuilder {
             document.add(Chunk.NEWLINE);
         } catch (DocumentException e) {
             throw this.onError("adding space", e);
+        }
+        return this;
+    }
+
+    public PdfBuilder twoColumns(Consumer<ColumnBuilder> leftContent,
+                                 Consumer<ColumnBuilder> rightContent) {
+        try {
+            PdfPTable table = new PdfPTable(2);
+            table.setWidthPercentage(100);
+
+            PdfPCell leftCell = new PdfPCell();
+            leftCell.setBorder(Rectangle.NO_BORDER);
+            leftCell.setPaddingRight(10);
+            leftContent.accept(new ColumnBuilder(leftCell));
+            table.addCell(leftCell);
+
+            PdfPCell rightCell = new PdfPCell();
+            rightCell.setBorder(Rectangle.NO_BORDER);
+            rightCell.setPaddingLeft(10);
+            rightContent.accept(new ColumnBuilder(rightCell));
+            table.addCell(rightCell);
+
+            document.add(table);
+        } catch (DocumentException e) {
+            throw this.onError("adding two columns", e);
         }
         return this;
     }
@@ -362,6 +400,50 @@ public class PdfBuilder {
             return Files.readAllBytes(Path.of(filename));
         } catch (IOException e) {
             throw this.onError("reading PDF", e);
+        }
+    }
+
+    public static class ColumnBuilder {
+        private final PdfPCell cell;
+
+        ColumnBuilder(PdfPCell cell) {
+            this.cell = cell;
+        }
+
+        public ColumnBuilder paragraph(String text) {
+            cell.addElement(new Paragraph(text, FONT_NORMAL));
+            return this;
+        }
+
+        public ColumnBuilder paragraphBold(String text) {
+            cell.addElement(new Paragraph(text, FONT_BOLD));
+            return this;
+        }
+
+        public ColumnBuilder section(String text) {
+            cell.addElement(new Paragraph(text, FONT_SECTION));
+            return this;
+        }
+
+        public ColumnBuilder space() {
+            cell.addElement(Chunk.NEWLINE);
+            return this;
+        }
+
+        public ColumnBuilder list(java.util.List<String> items) {
+            List list = new List(List.UNORDERED);
+            list.setListSymbol("• ");
+            items.forEach(item -> list.add(new ListItem(item, FONT_NORMAL)));
+            cell.addElement(list);
+            return this;
+        }
+
+        public ColumnBuilder labelValue(String label, String value) {
+            Paragraph p = new Paragraph();
+            p.add(new Chunk(label + ": ", FONT_BOLD));
+            p.add(new Chunk(value, FONT_NORMAL));
+            cell.addElement(p);
+            return this;
         }
     }
 }

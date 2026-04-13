@@ -2,7 +2,7 @@ package es.upm.miw.pdf;
 
 import lombok.extern.log4j.Log4j2;
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,13 +29,17 @@ public class PdfVisualCheck {
         byte[] pdf = new PdfBuilder("engagement-letter-test")
                 .header()
                 .title("HOJA DE ENCARGO PROFESIONAL")
-                .section("DATOS DEL CLIENTE")
-                .paragraph("Nombre: Juan García López")
-                .paragraph("DNI: 12345678A")
-                .paragraph("Email: juan.garcia@email.com")
-                .paragraph("Teléfono: +34 600 123 456")
-                .section("FECHA")
-                .paragraph("Fecha de creación: 13/04/2026")
+                .twoColumns(
+                        left -> left
+                                .section("DATOS DEL CLIENTE")
+                                .paragraph("Nombre: Juan García López")
+                                .paragraph("DNI: 12345678A")
+                                .paragraph("Email: juan.garcia@email.com")
+                                .paragraph("Teléfono: +34 600 123 456"),
+                        right -> right
+                                .section("FECHA")
+                                .paragraph("Fecha de creación: 13/04/2026")
+                )
                 .section("PROCEDIMIENTOS LEGALES")
                 .table(
                         new String[]{"Descripción", "Base", "IVA", "Total"},
@@ -58,7 +62,6 @@ public class PdfVisualCheck {
                 .twoColumnSignature("Firma del cliente", "Firma del abogado")
                 .footer()
                 .build();
-
         saveAndOpen(pdf, "engagement-letter.pdf");
     }
 
@@ -83,7 +86,6 @@ public class PdfVisualCheck {
                 )
                 .footer()
                 .build();
-
         saveAndOpen(pdf, "invoice.pdf");
     }
 
@@ -101,7 +103,6 @@ public class PdfVisualCheck {
                 .signatureLine("Firma")
                 .footer()
                 .build();
-
         saveAndOpen(pdf, "simple.pdf");
     }
 
@@ -113,7 +114,6 @@ public class PdfVisualCheck {
         Files.write(file, pdf);
         log.info("✓ " + filename);
 
-        // Abrir automáticamente si hay escritorio disponible
         if (Desktop.isDesktopSupported()) {
             Desktop.getDesktop().open(file.toFile());
         }
