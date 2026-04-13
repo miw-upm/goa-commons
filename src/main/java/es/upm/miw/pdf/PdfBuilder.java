@@ -34,13 +34,13 @@ public class PdfBuilder {
     public static final String LOGO_PATH = "images/oa.png";
 
     public PdfBuilder(String name) {
-        this.filename = System.getProperty("java.io.tmpdir") + "/" + name + ".pdf";
+        this.filename = Path.of(System.getProperty("java.io.tmpdir"), name + ".pdf").toString();
         this.document = new Document(PageSize.A4);
         try {
             PdfWriter.getInstance(document, new FileOutputStream(filename));
             document.open();
         } catch (Exception e) {
-            throw new PdfException("Error creating PDF: " + e.getMessage());
+            throw this.onError("creating PDF", e);
         }
     }
 
@@ -53,15 +53,7 @@ public class PdfBuilder {
             PdfPCell logoCell = new PdfPCell();
             logoCell.setBorder(Rectangle.NO_BORDER);
             logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            try (InputStream is = getClass().getClassLoader().getResourceAsStream(LOGO_PATH)) {
-                if (is != null) {
-                    byte[] logoBytes = is.readAllBytes();
-                    Image logo = Image.getInstance(logoBytes);
-                    logo.scaleToFit(80, 80);
-                    logoCell.addElement(logo);
-                }
-            } catch (IOException ignored) {
-            }
+            this.addLogoToCell(logoCell);
             header.addCell(logoCell);
 
             PdfPCell infoCell = new PdfPCell();
@@ -83,22 +75,33 @@ public class PdfBuilder {
             document.add(Chunk.NEWLINE);
             this.line();
         } catch (DocumentException e) {
-            throw new PdfException("Error adding header: " + e.getMessage());
+            throw this.onError("adding header", e);
         }
         return this;
+    }
+
+    private void addLogoToCell(PdfPCell logoCell) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(LOGO_PATH)) {
+            if (is != null) {
+                byte[] logoBytes = is.readAllBytes();
+                Image logo = Image.getInstance(logoBytes);
+                logo.scaleToFit(80, 80);
+                logoCell.addElement(logo);
+            }
+        } catch (IOException | BadElementException ignored) {
+        }
     }
 
     public PdfBuilder footer() {
         try {
             this.line();
             document.add(Chunk.NEWLINE);
-
             Paragraph footer = new Paragraph();
             footer.setAlignment(Element.ALIGN_CENTER);
             footer.add(new Chunk(COMPANY_EMAIL + " | " + COMPANY_WEB, FONT_SMALL));
             document.add(footer);
         } catch (DocumentException e) {
-            throw new PdfException("Error adding footer: " + e.getMessage());
+            throw this.onError("adding footer", e);
         }
         return this;
     }
@@ -110,7 +113,7 @@ public class PdfBuilder {
             title.setSpacingAfter(10);
             document.add(title);
         } catch (DocumentException e) {
-            throw new PdfException("Error adding title: " + e.getMessage());
+            throw this.onError("adding title", e);
         }
         return this;
     }
@@ -122,7 +125,7 @@ public class PdfBuilder {
             section.setSpacingAfter(5);
             document.add(section);
         } catch (DocumentException e) {
-            throw new PdfException("Error adding section: " + e.getMessage());
+            throw this.onError("adding section", e);
         }
         return this;
     }
@@ -131,7 +134,7 @@ public class PdfBuilder {
         try {
             document.add(new Paragraph(text, FONT_NORMAL));
         } catch (DocumentException e) {
-            throw new PdfException("Error adding paragraph: " + e.getMessage());
+            throw this.onError("adding paragraph", e);
         }
         return this;
     }
@@ -140,7 +143,7 @@ public class PdfBuilder {
         try {
             document.add(new Paragraph(text, FONT_BOLD));
         } catch (DocumentException e) {
-            throw new PdfException("Error adding bold paragraph: " + e.getMessage());
+            throw this.onError("adding bold paragraph", e);
         }
         return this;
     }
@@ -149,7 +152,7 @@ public class PdfBuilder {
         try {
             document.add(new Paragraph(new Chunk(new LineSeparator())));
         } catch (DocumentException e) {
-            throw new PdfException("Error adding line: " + e.getMessage());
+            throw this.onError("adding line", e);
         }
         return this;
     }
@@ -158,7 +161,7 @@ public class PdfBuilder {
         try {
             document.add(Chunk.NEWLINE);
         } catch (DocumentException e) {
-            throw new PdfException("Error adding space: " + e.getMessage());
+            throw this.onError("adding space", e);
         }
         return this;
     }
@@ -187,7 +190,7 @@ public class PdfBuilder {
 
             document.add(table);
         } catch (DocumentException e) {
-            throw new PdfException("Error adding table: " + e.getMessage());
+            throw this.onError("adding table", e);
         }
         return this;
     }
@@ -216,7 +219,7 @@ public class PdfBuilder {
 
             document.add(table);
         } catch (DocumentException e) {
-            throw new PdfException("Error adding table: " + e.getMessage());
+            throw this.onError("adding table", e);
         }
         return this;
     }
@@ -257,7 +260,7 @@ public class PdfBuilder {
 
             document.add(table);
         } catch (DocumentException e) {
-            throw new PdfException("Error adding table with total: " + e.getMessage());
+            throw this.onError("adding table with total", e);
         }
         return this;
     }
@@ -269,7 +272,7 @@ public class PdfBuilder {
             items.forEach(item -> list.add(new ListItem(item, FONT_NORMAL)));
             document.add(list);
         } catch (DocumentException e) {
-            throw new PdfException("Error adding list: " + e.getMessage());
+            throw this.onError("adding list", e);
         }
         return this;
     }
@@ -280,7 +283,7 @@ public class PdfBuilder {
             items.forEach(item -> list.add(new ListItem(item, FONT_NORMAL)));
             document.add(list);
         } catch (DocumentException e) {
-            throw new PdfException("Error adding numbered list: " + e.getMessage());
+            throw this.onError("adding numbered list", e);
         }
         return this;
     }
@@ -292,7 +295,7 @@ public class PdfBuilder {
             img.setAlignment(Image.ALIGN_CENTER);
             document.add(img);
         } catch (Exception e) {
-            throw new PdfException("Error adding image: " + e.getMessage());
+            throw this.onError("adding image", e);
         }
         return this;
     }
@@ -306,7 +309,7 @@ public class PdfBuilder {
             signature.add(new Chunk(label, FONT_SMALL));
             document.add(signature);
         } catch (DocumentException e) {
-            throw new PdfException("Error adding signature line: " + e.getMessage());
+            throw this.onError("adding signature line", e);
         }
         return this;
     }
@@ -339,7 +342,7 @@ public class PdfBuilder {
 
             document.add(table);
         } catch (DocumentException e) {
-            throw new PdfException("Error adding signature lines: " + e.getMessage());
+            throw this.onError("adding signature lines", e);
         }
         return this;
     }
@@ -349,12 +352,16 @@ public class PdfBuilder {
         return this;
     }
 
+    private PdfException onError(String action, Exception e) {
+        return new PdfException("Error " + action + ": " + e.getMessage());
+    }
+
     public byte[] build() {
         document.close();
         try {
             return Files.readAllBytes(Path.of(filename));
         } catch (IOException e) {
-            throw new PdfException("Error reading PDF: " + e.getMessage());
+            throw this.onError("reading PDF", e);
         }
     }
 }
