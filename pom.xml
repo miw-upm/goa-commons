@@ -46,7 +46,7 @@
         <!-- Official Plugin Sonar -->
         <sonar-maven-plugin-version>5.5.0.6356</sonar-maven-plugin-version>
         <!-- Lombok -->
-        <lombok.version>1.18.36</lombok.version>
+        <lombok.version>1.18.44</lombok.version>
         <!-- JUnit -->
         <junit-jupiter.version>6.0.3</junit-jupiter.version>
         <assertj.version>3.27.7</assertj.version>
