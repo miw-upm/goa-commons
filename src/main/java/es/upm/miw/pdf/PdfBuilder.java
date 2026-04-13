@@ -25,15 +25,13 @@ public class PdfBuilder {
     private static final Font FONT_SMALL = new Font(Font.HELVETICA, 8);
     private static final Font FONT_HEADER = new Font(Font.HELVETICA, 9);
 
-    private static final String COMPANY_NAME = "Gestión Ocaña Abogados";
-    private static final String COMPANY_LEGAL_NAME = "Gestión Ocaña Abogados S.L.";
-    private static final String COMPANY_NIF = "B12345678";
-    private static final String COMPANY_ADDRESS = "C/ Gran Vía 42, 28013 Madrid";
-    private static final String COMPANY_PHONE = "+34 910 123 456";
-    private static final String COMPANY_EMAIL = "info@ocanabogados.es";
+    private static final String COMPANY_NAME = "Ocaña Abogados";
+    private static final String COMPANY_NIF = "46882956D";
+    private static final String COMPANY_ADDRESS = "Paseo de la Castellana, 93-2º, 28046 Madrid";
+    private static final String COMPANY_PHONE = "+34 644 993 593";
+    private static final String COMPANY_EMAIL = "nuria@ocanabogados.es";
     private static final String COMPANY_WEB = "www.ocanabogados.es";
-    private static final String COMPANY_FOOTER = "Inscrita en el Registro Mercantil de Madrid";
-    private static final String LOGO_PATH = "images/logo.png";
+    public static final String LOGO_PATH = "images/oa.png";
 
     public PdfBuilder(String name) {
         this.filename = System.getProperty("java.io.tmpdir") + "/" + name + ".pdf";
@@ -74,7 +72,6 @@ public class PdfBuilder {
             Paragraph info = new Paragraph();
             info.setAlignment(Element.ALIGN_RIGHT);
             info.add(new Chunk(COMPANY_NAME + "\n", FONT_BOLD));
-            info.add(new Chunk(COMPANY_LEGAL_NAME + "\n", FONT_HEADER));
             info.add(new Chunk("NIF: " + COMPANY_NIF + "\n", FONT_HEADER));
             info.add(new Chunk(COMPANY_ADDRESS + "\n", FONT_HEADER));
             info.add(new Chunk("Tel: " + COMPANY_PHONE + "\n", FONT_HEADER));
@@ -98,7 +95,6 @@ public class PdfBuilder {
 
             Paragraph footer = new Paragraph();
             footer.setAlignment(Element.ALIGN_CENTER);
-            footer.add(new Chunk(COMPANY_FOOTER + "\n", FONT_SMALL));
             footer.add(new Chunk(COMPANY_EMAIL + " | " + COMPANY_WEB, FONT_SMALL));
             document.add(footer);
         } catch (DocumentException e) {
