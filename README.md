@@ -12,6 +12,23 @@
 
 `Java` `Maven` `GitHub` `GitHub Actions` `GitHub Packages`
 
+### Configuración necesaria
+
+Añadir en `~/.m2/settings.xml`:
+
+\```xml
+<settings>
+    <servers>
+        <server>
+            <id>github</id>
+            <username>miw-upm</username>
+            <password>token</password>
+        </server>
+    </servers>
+</settings>
+\```
+
+
 ### Contenido
 
 | Paquete | Clase | Descripción |
