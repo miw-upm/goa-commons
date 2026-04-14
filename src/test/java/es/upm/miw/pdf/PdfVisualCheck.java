@@ -15,7 +15,7 @@ import java.util.List;
 @Log4j2
 public class PdfVisualCheck {
 
-    private static final String OUTPUT_DIR = System.getProperty("user.home") + "/Desktop/pdf-tests/";
+    private static final String OUTPUT_DIR = "target/pdf-tests/";
 
     public static void main(String[] args) throws IOException {
         log.info("Generando PDFs de prueba en: {}", OUTPUT_DIR);
