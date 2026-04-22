@@ -29,7 +29,7 @@ public class EmailTemplateRenderer {
             }
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new InternalServerException("Cannot load email template: " + path);
+            throw new InternalServerException("Cannot load email template: " + path, e);
         }
     }
 }

@@ -31,6 +31,12 @@ class ExceptionTest {
     }
 
     @Test
+    void testUnauthorizedException() {
+        UnauthorizedException ex = new UnauthorizedException("detail");
+        assertThat(ex.getMessage()).isEqualTo("Unauthorized Exception. detail");
+    }
+
+    @Test
     void testNotFoundException() {
         NotFoundException ex = new NotFoundException("detail");
         assertThat(ex.getMessage()).isEqualTo("Not Found Exception. detail");
@@ -45,9 +51,22 @@ class ExceptionTest {
     @Test
     void testErrorMessage() {
         NotFoundException ex = new NotFoundException("not found");
-        ErrorMessage errorMessage = new ErrorMessage(ex, 404);
+        ErrorMessage errorMessage = new ErrorMessage(ex);
         assertThat(errorMessage.getError()).isEqualTo("NotFoundException");
-        assertThat(errorMessage.getMessage()).isEqualTo("Not Found Exception. not found");
-        assertThat(errorMessage.getCode()).isEqualTo(404);
+        assertThat(errorMessage.getMessage()).isEqualTo("not found");
+        assertThat(errorMessage.getCause()).isEqualTo("");
+    }
+
+    @Test
+    void testErrorMessageWithCauseChain() {
+        IllegalArgumentException source = new IllegalArgumentException("invalid data");
+        BadRequestException badRequestException = new BadRequestException("bad payload", source);
+        InternalServerException ex = new InternalServerException("cannot process request", badRequestException);
+        ErrorMessage errorMessage = new ErrorMessage(ex);
+
+        assertThat(errorMessage.getError()).isEqualTo("InternalServerException");
+        assertThat(errorMessage.getMessage()).isEqualTo("cannot process request");
+        assertThat(errorMessage.getCause()).isEqualTo(
+                "BadRequestException: Bad Request Exception. bad payload -> IllegalArgumentException: invalid data");
     }
 }

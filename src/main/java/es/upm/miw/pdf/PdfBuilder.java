@@ -1,12 +1,16 @@
 package es.upm.miw.pdf;
 
 import org.openpdf.text.*;
+import org.openpdf.text.Font;
+import org.openpdf.text.Image;
+import org.openpdf.text.List;
+import org.openpdf.text.Rectangle;
 import org.openpdf.text.pdf.PdfPCell;
 import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfWriter;
 import org.openpdf.text.pdf.draw.LineSeparator;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,23 +20,21 @@ import java.util.function.Consumer;
 
 public class PdfBuilder {
 
-    private final Document document;
-    private final String filename;
-
+    public static final String LOGO_PATH = "images/oa.png";
     private static final Font FONT_NORMAL = new Font(Font.HELVETICA, 10);
     private static final Font FONT_BOLD = new Font(Font.HELVETICA, 10, Font.BOLD);
     private static final Font FONT_TITLE = new Font(Font.HELVETICA, 16, Font.BOLD);
     private static final Font FONT_SECTION = new Font(Font.HELVETICA, 12, Font.BOLD);
     private static final Font FONT_SMALL = new Font(Font.HELVETICA, 8);
     private static final Font FONT_HEADER = new Font(Font.HELVETICA, 9);
-
     private static final String COMPANY_NAME = "Ocaña Abogados";
     private static final String COMPANY_NIF = "46882956D";
     private static final String COMPANY_ADDRESS = "Paseo de la Castellana, 93-2º, 28046 Madrid";
     private static final String COMPANY_PHONE = "+34 644 993 593";
     private static final String COMPANY_EMAIL = "nuria@ocanabogados.es";
     private static final String COMPANY_WEB = "www.ocanabogados.es";
-    public static final String LOGO_PATH = "images/oa.png";
+    private final Document document;
+    private final String filename;
 
     public PdfBuilder(String name) {
         this.filename = Path.of(System.getProperty("java.io.tmpdir"), name + ".pdf").toString();
