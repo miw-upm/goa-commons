@@ -50,10 +50,6 @@ public class PdfBuilder {
     public PdfBuilder header() {
         try {
             PdfPTable header = new PdfPTable(2);
-
-
-
-
             header.setWidthPercentage(100);
             header.setWidths(new float[]{30, 70});
 
