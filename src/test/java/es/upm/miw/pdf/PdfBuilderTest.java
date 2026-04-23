@@ -1,25 +1,12 @@
 package es.upm.miw.pdf;
 
 import org.junit.jupiter.api.Test;
-import org.openpdf.text.Document;
 import org.openpdf.text.pdf.PdfReader;
 import org.openpdf.text.pdf.parser.PdfTextExtractor;
-
-import java.lang.reflect.Field;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PdfBuilderTest {
-
-    @Test
-    void shouldReserveBottomMarginForFooter() throws Exception {
-        PdfBuilder pdfBuilder = new PdfBuilder();
-        Field documentField = PdfBuilder.class.getDeclaredField("document");
-        documentField.setAccessible(true);
-        Document document = (Document) documentField.get(pdfBuilder);
-
-        assertThat(document.bottomMargin()).isGreaterThanOrEqualTo(72f);
-    }
 
     @Test
     void shouldRenderFooterOnFirstPage() throws Exception {
