@@ -18,9 +18,9 @@ public class PdfBuilder {
 
     private static final float PAGE_MARGIN_LEFT_RIGHT = 36f;
     private static final float PAGE_MARGIN_TOP = 22f;
-    private static final float PAGE_MARGIN_BOTTOM = 70f;
-    private static final float FOOTER_TEXT_OFFSET = 42f;
-    private static final float FOOTER_SEPARATOR_OFFSET = 20f;
+    private static final float PAGE_MARGIN_BOTTOM = 60f;
+    private static final float FOOTER_TEXT_OFFSET = 35f;
+    private static final float FOOTER_SEPARATOR_OFFSET = 15f;
 
     private static final BaseFont BASE_FONT_HELVETICA = requiredBaseFont(BaseFont.HELVETICA);
     private static final BaseFont BASE_FONT_HELVETICA_BOLD = requiredBaseFont(BaseFont.HELVETICA_BOLD);
