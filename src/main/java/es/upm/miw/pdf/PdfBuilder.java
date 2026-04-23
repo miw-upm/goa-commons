@@ -192,7 +192,7 @@ public class PdfBuilder {
             List list = new List(List.UNORDERED);
             list.setListSymbol("- ");
             list.setIndentationLeft(15);
-            items.forEach(item -> list.add(new ListItem(item+".", FONT_NORMAL)));
+            items.forEach(item -> list.add(new ListItem(item + ".", FONT_NORMAL)));
             document.add(list);
         });
     }
@@ -531,7 +531,7 @@ public class PdfBuilder {
         public ColumnBuilder list(java.util.List<String> items) {
             List list = new List(List.UNORDERED);
             list.setListSymbol("-");
-            items.forEach(item -> list.add(new ListItem(item+".", FONT_NORMAL)));
+            items.forEach(item -> list.add(new ListItem(item + ".", FONT_NORMAL)));
             cell.addElement(list);
             return this;
         }
