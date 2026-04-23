@@ -1,10 +1,16 @@
 package es.upm.miw.pdf;
 
-public class PdfException extends RuntimeException {
+import es.upm.miw.exception.ApiException;
+
+public class PdfException extends ApiException {
 
     private static final String DESCRIPTION = "PDF Exception";
 
     public PdfException(String detail) {
-        super(DESCRIPTION + ": " + detail);
+        super(DESCRIPTION, detail);
+    }
+
+    public PdfException(String detail, Throwable cause) {
+        super(DESCRIPTION, detail, cause);
     }
 }
