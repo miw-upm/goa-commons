@@ -56,6 +56,8 @@
         <jakarta.validation-api.version>3.1.0</jakarta.validation-api.version>
         <!-- OpenPDF -->
         <openpdf.version>3.0.3</openpdf.version>
+        <!-- Yaml -->
+        <snakeyaml.version>2.6</snakeyaml.version>
     </properties>
 
     <dependencies>
@@ -84,6 +86,11 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>${snakeyaml.version}</version>
         </dependency>
 
         <!-- Test -->
