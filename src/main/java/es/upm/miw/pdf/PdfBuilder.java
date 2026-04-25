@@ -30,6 +30,8 @@ public class PdfBuilder {
     private static final Font FONT_SECTION = createFont(BASE_FONT_HELVETICA_BOLD, 12, Font.BOLD);
     private static final Font FONT_SMALL = createFont(BASE_FONT_HELVETICA, 8, Font.NORMAL);
     private static final Font FONT_HEADER = createFont(BASE_FONT_HELVETICA, 9, Font.NORMAL);
+    private static final Color SIGNATURE_BLUE = new Color(0, 51, 153);
+    private static final Font FONT_SIGNATURE = new Font(BASE_FONT_HELVETICA_BOLD, 8, Font.BOLD, SIGNATURE_BLUE);
     private static final Color HEADER_BG = new Color(240, 240, 240);
 
     private static final String COMPANY_NAME = "Ocaña Abogados";
@@ -291,7 +293,7 @@ public class PdfBuilder {
                 Paragraph p = new Paragraph();
                 p.add(new Chunk("\n\n"));
                 if (ls.signature() != null && !ls.signature().isBlank()) {
-                    p.add(new Chunk(ls.signature() + "\n", FONT_BOLD));
+                    p.add(new Chunk(ls.signature() + "\n", FONT_SIGNATURE));
                 }
                 p.add(new Chunk("_".repeat(30) + "\n", FONT_NORMAL));
                 p.add(new Chunk(ls.label(), FONT_SMALL));
