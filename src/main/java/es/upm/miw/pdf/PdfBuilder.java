@@ -17,10 +17,10 @@ import java.util.function.Consumer;
 public class PdfBuilder {
 
     private static final float PAGE_MARGIN_LEFT_RIGHT = 36f;
-    private static final float PAGE_MARGIN_TOP = 36f;
-    private static final float PAGE_MARGIN_BOTTOM = 72f;
-    private static final float FOOTER_TEXT_OFFSET = 22f;
-    private static final float FOOTER_SEPARATOR_OFFSET = 8f;
+    private static final float PAGE_MARGIN_TOP = 22f;
+    private static final float PAGE_MARGIN_BOTTOM = 57f;
+    private static final float FOOTER_TEXT_OFFSET = 35f;
+    private static final float FOOTER_SEPARATOR_OFFSET = 22f;
 
     private static final BaseFont BASE_FONT_HELVETICA = requiredBaseFont(BaseFont.HELVETICA);
     private static final BaseFont BASE_FONT_HELVETICA_BOLD = requiredBaseFont(BaseFont.HELVETICA_BOLD);
@@ -192,7 +192,7 @@ public class PdfBuilder {
             List list = new List(List.UNORDERED);
             list.setListSymbol("- ");
             list.setIndentationLeft(15);
-            items.forEach(item -> list.add(new ListItem(item+".", FONT_NORMAL)));
+            items.forEach(item -> list.add(new ListItem(item + ".", FONT_NORMAL)));
             document.add(list);
         });
     }
@@ -531,7 +531,7 @@ public class PdfBuilder {
         public ColumnBuilder list(java.util.List<String> items) {
             List list = new List(List.UNORDERED);
             list.setListSymbol("-");
-            items.forEach(item -> list.add(new ListItem(item+".", FONT_NORMAL)));
+            items.forEach(item -> list.add(new ListItem(item + ".", FONT_NORMAL)));
             cell.addElement(list);
             return this;
         }
