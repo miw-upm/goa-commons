@@ -314,6 +314,7 @@ public class PdfBuilder {
             document.add(table);
         });
     }
+
     private void addStamp() {
         try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(STAMP_PATH)) {
             if (is != null) {
