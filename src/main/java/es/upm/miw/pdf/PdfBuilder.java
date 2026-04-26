@@ -30,6 +30,8 @@ public class PdfBuilder {
     private static final Font FONT_SECTION = createFont(BASE_FONT_HELVETICA_BOLD, 12, Font.BOLD);
     private static final Font FONT_SMALL = createFont(BASE_FONT_HELVETICA, 8, Font.NORMAL);
     private static final Font FONT_HEADER = createFont(BASE_FONT_HELVETICA, 9, Font.NORMAL);
+    private static final Color SIGNATURE_BLUE = new Color(0, 51, 153);
+    private static final Font FONT_SIGNATURE = new Font(BASE_FONT_HELVETICA_BOLD, 8, Font.BOLD, SIGNATURE_BLUE);
     private static final Color HEADER_BG = new Color(240, 240, 240);
 
     private static final String COMPANY_NAME = "Ocaña Abogados";
@@ -276,15 +278,25 @@ public class PdfBuilder {
     }
 
     public PdfBuilder multiSignature(java.util.List<String> leftLabels, String rightLabel) {
+        java.util.List<LeftSignature> signatures = leftLabels.stream()
+                .map(LeftSignature::new)
+                .toList();
+        return this.multiSignatureWithSignatures(signatures, rightLabel);
+    }
+
+    public PdfBuilder multiSignatureWithSignatures(java.util.List<LeftSignature> leftSignatures, String rightLabel) {
         return this.add("multi signature", () -> {
             PdfPTable table = this.createTable(2);
 
             PdfPCell leftCell = this.noBorderCell();
-            for (String label : leftLabels) {
+            for (LeftSignature ls : leftSignatures) {
                 Paragraph p = new Paragraph();
                 p.add(new Chunk("\n\n"));
+                if (ls.signature() != null && !ls.signature().isBlank()) {
+                    p.add(new Chunk(ls.signature() + "\n", FONT_SIGNATURE));
+                }
                 p.add(new Chunk("_".repeat(30) + "\n", FONT_NORMAL));
-                p.add(new Chunk(label, FONT_SMALL));
+                p.add(new Chunk(ls.label(), FONT_SMALL));
                 leftCell.addElement(p);
             }
             table.addCell(leftCell);
@@ -302,7 +314,6 @@ public class PdfBuilder {
             document.add(table);
         });
     }
-
     private void addStamp() {
         try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(STAMP_PATH)) {
             if (is != null) {
@@ -492,6 +503,12 @@ public class PdfBuilder {
     @FunctionalInterface
     private interface DocumentAction {
         void run() throws DocumentException;
+    }
+
+    public record LeftSignature(String label, String signature) {
+        public LeftSignature(String label) {
+            this(label, null);
+        }
     }
 
     // === ColumnBuilder ===

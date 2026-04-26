@@ -1,11 +1,8 @@
 package es.upm.miw.pdf;
 
 import org.junit.jupiter.api.Test;
-import org.openpdf.text.Document;
 import org.openpdf.text.pdf.PdfReader;
 import org.openpdf.text.pdf.parser.PdfTextExtractor;
-
-import java.lang.reflect.Field;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
