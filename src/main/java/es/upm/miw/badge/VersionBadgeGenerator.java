@@ -10,8 +10,8 @@ public final class VersionBadgeGenerator {
                     <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
                     <stop offset="1" stop-opacity=".1"/>
                 </linearGradient>
-                <rect rx="3" width="%d" height="20" fill="#555"/>
-                <rect rx="3" x="%d" width="%d" height="20" fill="#4c1"/>
+                <rect rx="3" width="%d" height="20" fill="#6B5D4F"/>
+                <rect rx="3" x="%d" width="%d" height="20" fill="#4A5D3A"/>
                 <path fill="#4c1" d="M%d 0h4v20h-4z"/>
                 <rect rx="3" width="%d" height="20" fill="url(#a)"/>
                 <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
