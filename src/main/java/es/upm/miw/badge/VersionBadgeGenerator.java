@@ -12,7 +12,7 @@ public final class VersionBadgeGenerator {
                 </linearGradient>
                 <rect rx="3" width="%d" height="20" fill="#6B5D4F"/>
                 <rect rx="3" x="%d" width="%d" height="20" fill="#4A5D3A"/>
-                <path fill="#4c1" d="M%d 0h4v20h-4z"/>
+                <path fill="#4A5D3A" d="M%d 0h4v20h-4z"/>
                 <rect rx="3" width="%d" height="20" fill="url(#a)"/>
                 <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
                     <text x="%d" y="15" fill="#010101" fill-opacity=".3">%s</text>
