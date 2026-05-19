@@ -290,14 +290,7 @@ public class PdfBuilder {
 
             PdfPCell leftCell = this.noBorderCell();
             for (LeftSignature ls : leftSignatures) {
-                Paragraph p = new Paragraph();
-                p.add(new Chunk("\n\n"));
-                if (ls.signature() != null && !ls.signature().isBlank()) {
-                    p.add(new Chunk(ls.signature() + "\n", FONT_SIGNATURE));
-                }
-                p.add(new Chunk("_".repeat(30) + "\n", FONT_NORMAL));
-                p.add(new Chunk(ls.label(), FONT_SMALL));
-                leftCell.addElement(p);
+                leftCell.addElement(this.createSignatureParagraph(ls, Element.ALIGN_LEFT));
             }
             table.addCell(leftCell);
 
@@ -311,6 +304,28 @@ public class PdfBuilder {
             rightCell.addElement(right);
             table.addCell(rightCell);
 
+            document.add(table);
+        });
+    }
+
+    public PdfBuilder multiSignatureWithSignatures(java.util.List<LeftSignature> signatures) {
+        return this.add("multi signature split", () -> {
+            PdfPTable table = this.createTable(2);
+            PdfPCell leftCell = this.noBorderCell();
+            PdfPCell rightCell = this.noBorderCell();
+            rightCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+
+            for (int i = 0; i < signatures.size(); i++) {
+                LeftSignature signature = signatures.get(i);
+                if (i % 2 == 0) {
+                    leftCell.addElement(this.createSignatureParagraph(signature, Element.ALIGN_LEFT));
+                } else {
+                    rightCell.addElement(this.createSignatureParagraph(signature, Element.ALIGN_RIGHT));
+                }
+            }
+
+            table.addCell(leftCell);
+            table.addCell(rightCell);
             document.add(table);
         });
     }
@@ -497,6 +512,29 @@ public class PdfBuilder {
         return cell;
     }
 
+    private Paragraph createSignatureParagraph(LeftSignature signature, int alignment) {
+        Paragraph p = new Paragraph();
+        p.setAlignment(alignment);
+        p.add(new Chunk("\n\n"));
+        if (signature.signatureImage() != null && signature.signatureImage().length > 0) {
+            try {
+                Image signatureImage = Image.getInstance(signature.signatureImage());
+                signatureImage.scaleToFit(120, 50);
+                signatureImage.setAlignment(alignment);
+                p.add(new Chunk(signatureImage, 0, 0, false));
+                p.add(new Chunk("\n"));
+            } catch (Exception e) {
+                throw this.onError("loading signature image", e);
+            }
+        }
+        if (signature.signature() != null && !signature.signature().isBlank()) {
+            p.add(new Chunk(signature.signature() + "\n", FONT_SIGNATURE));
+        }
+        p.add(new Chunk("_".repeat(30) + "\n", FONT_NORMAL));
+        p.add(new Chunk(signature.label(), FONT_SMALL));
+        return p;
+    }
+
     private BadGatewayException onError(String action, Exception e) {
         return new BadGatewayException("Error " + action + ": " + e.getMessage());
     }
@@ -506,9 +544,13 @@ public class PdfBuilder {
         void run() throws DocumentException;
     }
 
-    public record LeftSignature(String label, String signature) {
+    public record LeftSignature(String label, String signature, byte[] signatureImage) {
         public LeftSignature(String label) {
-            this(label, null);
+            this(label, null, null);
+        }
+
+        public LeftSignature(String label, String signature) {
+            this(label, signature, null);
         }
     }
 
