@@ -519,7 +519,7 @@ public class PdfBuilder {
         if (signature.signatureImage() != null && signature.signatureImage().length > 0) {
             try {
                 Image signatureImage = Image.getInstance(signature.signatureImage());
-                signatureImage.scaleToFit(120, 50);
+                signatureImage.scaleToFit(480, 200);
                 signatureImage.setAlignment(alignment);
                 p.add(new Chunk(signatureImage, 0, 0, false));
                 p.add(new Chunk("\n"));
