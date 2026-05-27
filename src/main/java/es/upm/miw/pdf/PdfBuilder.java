@@ -55,6 +55,7 @@ public class PdfBuilder {
     private static final Font FONT_TABLE_CELL_BOLD = new Font(BASE_FONT_BOLD, 7f, Font.BOLD, ON_SURFACE);
     private static final Font FONT_TABLE_TOTAL = new Font(BASE_FONT_BOLD, 8.5f, Font.BOLD, PRIMARY);
     private static final Font FONT_SIGNATURE   = new Font(BASE_FONT_BOLD,  7f, Font.BOLD,  SIGNATURE_BLUE);
+    private static final Font FONT_HIGHLIGHT = new Font(BASE_FONT_BOLD, 9f, Font.BOLD, SECONDARY);
 
     // === Empresa ===
     private static final String COMPANY_NAME = "Ocaña Abogados";
@@ -250,6 +251,20 @@ public class PdfBuilder {
         });
     }
 
+    public PdfBuilder paragraphHighlight(String text) {
+        return this.paragraphHighlight(text, Element.ALIGN_JUSTIFIED);
+    }
+
+    public PdfBuilder paragraphHighlight(String text, int alignment) {
+        return this.add("highlight paragraph", () -> {
+            Paragraph p = new Paragraph(text, FONT_HIGHLIGHT);
+            p.setAlignment(alignment);
+            p.setLeading(14);
+            p.setSpacingAfter(3);
+            document.add(p);
+        });
+    }
+
     public PdfBuilder paragraphs(String text) {
         for (String block : text.split("\n\n")) {
             block = block.trim();
@@ -413,7 +428,7 @@ public class PdfBuilder {
             try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(STAMP_PATH)) {
                 if (is != null) {
                     Image stamp = Image.getInstance(is.readAllBytes());
-                    stamp.scaleToFit(80, 80);
+                    stamp.scaleToFit(70, 70);
                     stamp.setAlignment(Element.ALIGN_LEFT);
                     cell.addElement(stamp);
                 }

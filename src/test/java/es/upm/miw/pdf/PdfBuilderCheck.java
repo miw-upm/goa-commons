@@ -44,8 +44,7 @@ class PdfBuilderCheck {
                 .paragraph("C/ Sierpes, 101, Sevilla, SEVILLA, 41001")
 
                 .section("Concepto")
-                .paragraph("FACTURA por ingreso de Provisión de Fondos.")
-                .space()
+                .paragraphBold("FACTURA por ingreso de Provisión de Fondos.")
                 .paragraph("Procedimiento de ejecución hipotecaria — 5.000,00 €")
                 .list(List.of(
                         "Estudio de antecedentes y documentación",
@@ -62,8 +61,8 @@ class PdfBuilderCheck {
                         ),
                         new String[]{"TOTAL", formatEuro(new BigDecimal("5450"))}
                 )
-                .paragraphBold("PENDIENTE DE INGRESAR: " + formatEuro(new BigDecimal("2400")))
-                .paragraph("Ruego que ingrese en la cuenta bancaria: ES00 1111 2222 3333 4444 5555")
+                .paragraphHighlight("PENDIENTE DE INGRESAR: " + formatEuro(new BigDecimal("2400")))
+                .paragraphHighlight("Ruego que ingrese en la cuenta bancaria: ES00 1111 2222 3333 4444 5555")
                 .signatureLine("Doña Nuria Ocaña Pérez")
 
 
@@ -89,6 +88,7 @@ class PdfBuilderCheck {
                         ),
                         new String[]{"TOTAL", "", formatEuro(new BigDecimal("5450")), ""}
                 )
+                .space(2)
 
                 .footer()
                 .build();
