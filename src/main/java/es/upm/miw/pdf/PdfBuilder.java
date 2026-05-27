@@ -7,6 +7,7 @@ import org.openpdf.text.Image;
 import org.openpdf.text.List;
 import org.openpdf.text.Rectangle;
 import org.openpdf.text.pdf.*;
+import org.openpdf.text.pdf.draw.LineSeparator;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
@@ -16,25 +17,48 @@ import java.util.function.Consumer;
 
 public class PdfBuilder {
 
-    private static final float PAGE_MARGIN_LEFT_RIGHT = 36f;
-    private static final float PAGE_MARGIN_TOP = 22f;
-    private static final float PAGE_MARGIN_BOTTOM = 57f;
-    private static final float FOOTER_TEXT_OFFSET = 35f;
-    private static final float FOOTER_SEPARATOR_OFFSET = 22f;
+    // === Layout ===
+    private static final float PAGE_MARGIN_LEFT_RIGHT = 48f;
+    private static final float PAGE_MARGIN_TOP = 36f;
+    private static final float PAGE_MARGIN_BOTTOM = 64f;
+    private static final float FOOTER_TEXT_OFFSET = 36f;
+    private static final float FOOTER_SEPARATOR_OFFSET = 24f;
 
-    private static final BaseFont BASE_FONT_HELVETICA = requiredBaseFont(BaseFont.HELVETICA);
-    private static final BaseFont BASE_FONT_HELVETICA_BOLD = requiredBaseFont(BaseFont.HELVETICA_BOLD);
-    private static final Font FONT_NORMAL = createFont(BASE_FONT_HELVETICA, 10, Font.NORMAL);
-    private static final Font FONT_BOLD = createFont(BASE_FONT_HELVETICA_BOLD, 10, Font.BOLD);
-    private static final Font FONT_TITLE = createFont(BASE_FONT_HELVETICA_BOLD, 14, Font.BOLD);
-    private static final Font FONT_SECTION = createFont(BASE_FONT_HELVETICA_BOLD, 12, Font.BOLD);
-    private static final Font FONT_SMALL = createFont(BASE_FONT_HELVETICA, 8, Font.NORMAL);
-    private static final Font FONT_HEADER = createFont(BASE_FONT_HELVETICA, 9, Font.NORMAL);
-    private static final Color SIGNATURE_BLUE = new Color(0, 51, 153);
-    private static final Font FONT_SIGNATURE = new Font(BASE_FONT_HELVETICA_BOLD, 8, Font.BOLD, SIGNATURE_BLUE);
-    private static final Color HEADER_BG = new Color(240, 240, 240);
+    // === Paleta GOA (alineada con theme.scss) ===
+    private static final Color PRIMARY             = new Color(0xBA, 0x79, 0x2E); // dorado
+    private static final Color SECONDARY           = new Color(0x4A, 0x5D, 0x3A); // verde oliva
+    private static final Color ON_SURFACE          = new Color(0x1F, 0x1D, 0x1A); // texto principal
+    private static final Color ON_SURFACE_VARIANT  = new Color(0x6B, 0x65, 0x5E); // texto secundario
+    private static final Color OUTLINE             = new Color(0x86, 0x80, 0x77); // bordes medios
+    private static final Color OUTLINE_VARIANT     = new Color(0xE3, 0xDF, 0xD8); // bordes suaves
+    private static final Color SURFACE_LOWEST      = new Color(0xFE, 0xFC, 0xF7); // casi blanco crema
+    private static final Color SURFACE_LOW         = new Color(0xF5, 0xF1, 0xE9); // crema
+    private static final Color PRIMARY_CONTAINER   = new Color(0xF5, 0xE6, 0xD3); // dorado claro
+    private static final Color SIGNATURE_BLUE      = new Color(0, 51, 153);
 
+    // === Fuentes ===
+    private static final BaseFont BASE_FONT      = requiredBaseFont(BaseFont.HELVETICA);
+    private static final BaseFont BASE_FONT_BOLD = requiredBaseFont(BaseFont.HELVETICA_BOLD);
+
+    private static final Font FONT_NORMAL      = new Font(BASE_FONT,      9f, Font.NORMAL, ON_SURFACE);
+    private static final Font FONT_BOLD        = new Font(BASE_FONT_BOLD, 9f, Font.BOLD,   ON_SURFACE);
+    private static final Font FONT_MUTED       = new Font(BASE_FONT,       8f, Font.NORMAL, ON_SURFACE_VARIANT);
+    private static final Font FONT_TITLE       = new Font(BASE_FONT_BOLD, 14f, Font.BOLD,   ON_SURFACE);
+    private static final Font FONT_KICKER      = new Font(BASE_FONT_BOLD,  8f, Font.BOLD, PRIMARY);
+    private static final Font FONT_SECTION     = new Font(BASE_FONT_BOLD, 10f, Font.BOLD,   ON_SURFACE);
+    private static final Font FONT_SMALL       = new Font(BASE_FONT,       7f, Font.NORMAL, ON_SURFACE_VARIANT);
+    private static final Font FONT_HEADER_BOLD = new Font(BASE_FONT_BOLD, 10f, Font.BOLD,   ON_SURFACE);
+    private static final Font FONT_HEADER      = new Font(BASE_FONT,       8f, Font.NORMAL, ON_SURFACE_VARIANT);
+    private static final Font FONT_TABLE_HEAD  = new Font(BASE_FONT_BOLD,  8f, Font.BOLD, ON_SURFACE_VARIANT);
+    private static final Font FONT_TABLE_FOOT = new Font(BASE_FONT_BOLD, 8f, Font.BOLD, ON_SURFACE);
+    private static final Font FONT_TABLE_CELL  = new Font(BASE_FONT,       7f, Font.NORMAL, ON_SURFACE);
+    private static final Font FONT_TABLE_CELL_BOLD = new Font(BASE_FONT_BOLD, 7f, Font.BOLD, ON_SURFACE);
+    private static final Font FONT_TABLE_TOTAL = new Font(BASE_FONT_BOLD, 8.5f, Font.BOLD, PRIMARY);
+    private static final Font FONT_SIGNATURE   = new Font(BASE_FONT_BOLD,  7f, Font.BOLD,  SIGNATURE_BLUE);
+
+    // === Empresa ===
     private static final String COMPANY_NAME = "Ocaña Abogados";
+    private static final String COMPANY_OWNER = "Nuria Ocaña Pérez";
     private static final String COMPANY_NIF = "46882956D";
     private static final String COMPANY_ADDRESS = "Paseo de la Castellana, 93-2ª, 28046 Madrid";
     private static final String COMPANY_PHONE = "+34 644 993 593";
@@ -65,10 +89,6 @@ public class PdfBuilder {
         }
     }
 
-    private static Font createFont(BaseFont baseFont, float size, int style) {
-        return new Font(baseFont, size, style);
-    }
-
     private static BaseFont requiredBaseFont(String fontName) {
         try {
             return BaseFont.createFont(fontName, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
@@ -77,20 +97,26 @@ public class PdfBuilder {
         }
     }
 
+    // =========================================================================
+    // HEADER / FOOTER
+    // =========================================================================
+
     public PdfBuilder header() {
         return this.add("header", () -> {
-            PdfPTable table = this.createTable(2, 59, 41);
+            PdfPTable table = this.createTable(2, 50, 50);
             table.addCell(this.createLogoCell());
             table.addCell(this.createInfoCell());
+            table.setSpacingAfter(14);
             document.add(table);
-        }).space().line();
+        }).softLine().space();
     }
 
     public PdfBuilder footer() {
-        this.line().space();
+        this.space().softLine();
         return this.add("footer", () -> {
             Paragraph info = new Paragraph();
             info.setAlignment(Element.ALIGN_CENTER);
+            info.setSpacingBefore(8);
             info.add(new Chunk(COMPANY_NAME + "\n", FONT_BOLD));
             info.add(new Chunk(COMPANY_ADDRESS + "\n", FONT_SMALL));
             info.add(new Chunk("Tel: " + COMPANY_PHONE + " | " + COMPANY_EMAIL + " | " + COMPANY_WEB, FONT_SMALL));
@@ -98,35 +124,83 @@ public class PdfBuilder {
         });
     }
 
+    // =========================================================================
+    // TÍTULOS Y SECCIONES
+    // =========================================================================
+
     public PdfBuilder title(String text) {
         return this.add("title", () -> {
-            Paragraph p = new Paragraph(text, FONT_TITLE);
-            p.setAlignment(Element.ALIGN_CENTER);
-            p.setSpacingAfter(10);
+            Paragraph p = new Paragraph();
+            p.setAlignment(Element.ALIGN_LEFT);
+            Chunk titleChunk = new Chunk(text, FONT_TITLE);
+            titleChunk.setCharacterSpacing(-0.3f); // tracking ajustado tipo display
+            p.add(titleChunk);
+            p.setSpacingBefore(4);
+            p.setSpacingAfter(2);
             document.add(p);
+            // Filete acento dorado bajo el título
+            this.accentRule(PRIMARY, 150f, 1f);
         });
     }
 
     public PdfBuilder section(String text) {
-        if (writer.getVerticalPosition(true) < document.bottomMargin() + 50) {
+        if (writer.getVerticalPosition(true) < document.bottomMargin() + 60) {
             document.newPage();
         }
         return this.add("section", () -> {
-            document.add(Chunk.NEWLINE);
-            Paragraph p = new Paragraph(text, FONT_SECTION);
-            p.setSpacingAfter(5);
-            document.add(p);
+            Paragraph spacer = new Paragraph(" ");
+            spacer.setLeading(10);
+            document.add(spacer);
+
+            // "Kicker" en mayúsculas con tracking, color primario
+            Paragraph kicker = new Paragraph();
+            Chunk c = new Chunk(text.toUpperCase(), FONT_KICKER);
+            c.setCharacterSpacing(1.2f);
+            kicker.add(c);
+            kicker.setSpacingAfter(4);
+            document.add(kicker);
         });
     }
 
+    /** Línea fina horizontal en color outline-variant (separador visual suave). */
     public PdfBuilder line() {
         PdfContentByte cb = writer.getDirectContent();
         float y = writer.getVerticalPosition(true) - 5;
-        cb.setLineWidth(1f);
+        cb.saveState();
+        cb.setLineWidth(0.6f);
+        cb.setColorStroke(OUTLINE_VARIANT);
         cb.moveTo(document.leftMargin(), y);
         cb.lineTo(document.right(), y);
         cb.stroke();
+        cb.restoreState();
         return this;
+    }
+
+    /** Filete ultra-fino en outline-variant. */
+    public PdfBuilder softLine() {
+        PdfContentByte cb = writer.getDirectContent();
+        float y = writer.getVerticalPosition(true) - 4;
+        cb.saveState();
+        cb.setLineWidth(0.4f);
+        cb.setColorStroke(OUTLINE_VARIANT);
+        cb.moveTo(document.leftMargin(), y);
+        cb.lineTo(document.right(), y);
+        cb.stroke();
+        cb.restoreState();
+        return this;
+    }
+
+    /** Pequeña barra de color (acento), normalmente bajo títulos. */
+    private void accentRule(Color color, float width, float thickness) {
+        PdfContentByte cb = writer.getDirectContent();
+        float y = writer.getVerticalPosition(true) - 6;
+        cb.saveState();
+        cb.setLineWidth(thickness);
+        cb.setColorStroke(color);
+        cb.moveTo(document.leftMargin(), y);
+        cb.lineTo(document.leftMargin() + width, y);
+        cb.stroke();
+        cb.restoreState();
     }
 
     public PdfBuilder space() {
@@ -137,7 +211,7 @@ public class PdfBuilder {
         return this.add("space", () -> {
             for (int i = 0; i < times; i++) {
                 Paragraph p = new Paragraph(" ");
-                p.setLeading(6);
+                p.setLeading(8);
                 document.add(p);
             }
         });
@@ -148,10 +222,16 @@ public class PdfBuilder {
         return this;
     }
 
+    // =========================================================================
+    // PÁRRAFOS
+    // =========================================================================
+
     public PdfBuilder paragraph(String text) {
         return this.add("paragraph", () -> {
             Paragraph p = new Paragraph(text, FONT_NORMAL);
             p.setAlignment(Element.ALIGN_JUSTIFIED);
+            p.setLeading(14);
+            p.setSpacingAfter(3);
             document.add(p);
         });
     }
@@ -164,6 +244,8 @@ public class PdfBuilder {
         return this.add("bold paragraph", () -> {
             Paragraph p = new Paragraph(text, FONT_BOLD);
             p.setAlignment(alignment);
+            p.setLeading(14);
+            p.setSpacingAfter(3);
             document.add(p);
         });
     }
@@ -182,19 +264,27 @@ public class PdfBuilder {
     public PdfBuilder labelValue(String label, String value) {
         return this.add("label-value", () -> {
             Paragraph p = new Paragraph();
-            p.add(new Chunk(label + ": ", FONT_BOLD));
-            p.add(new Chunk(value != null ? value : "-", FONT_NORMAL));
+            p.setLeading(14);
+            p.add(new Chunk(label + "  ", FONT_MUTED));
+            p.add(new Chunk(value != null ? value : "—", FONT_BOLD));
             document.add(p);
         });
     }
 
-    // === Listas ===
+    // =========================================================================
+    // LISTAS
+    // =========================================================================
+
     public PdfBuilder list(java.util.List<String> items) {
         return this.add("list", () -> {
             List list = new List(List.UNORDERED);
-            list.setListSymbol("- ");
+            list.setListSymbol(new Chunk("•  ", new Font(BASE_FONT_BOLD, 10f, Font.BOLD, PRIMARY)));
             list.setIndentationLeft(15);
-            items.forEach(item -> list.add(new ListItem(item + ".", FONT_NORMAL)));
+            items.forEach(item -> {
+                ListItem li = new ListItem(item + ".", FONT_NORMAL);
+                li.setLeading(14);
+                list.add(li);
+            });
             document.add(list);
         });
     }
@@ -203,10 +293,18 @@ public class PdfBuilder {
         return this.add("numbered list", () -> {
             List list = new List(List.ORDERED);
             list.setIndentationLeft(15);
-            items.forEach(item -> list.add(new ListItem(item, FONT_NORMAL)));
+            items.forEach(item -> {
+                ListItem li = new ListItem(item, FONT_NORMAL);
+                li.setLeading(14);
+                list.add(li);
+            });
             document.add(list);
         });
     }
+
+    // =========================================================================
+    // COLUMNAS
+    // =========================================================================
 
     public PdfBuilder twoColumns(Consumer<ColumnBuilder> leftContent, Consumer<ColumnBuilder> rightContent) {
         return this.add("two columns", () -> {
@@ -217,28 +315,52 @@ public class PdfBuilder {
         });
     }
 
-    public PdfBuilder table(String[] headers, java.util.List<String[]> rows) {
+    // =========================================================================
+    // TABLAS
+    // =========================================================================
+
+    public PdfBuilder table(String[] headers, java.util.List<String[]> rows, String[] footer) {
         return this.add("table", () -> {
             this.validateTableInput(headers, rows);
+            if (footer != null && footer.length != headers.length) {
+                throw new IllegalArgumentException("table footer size must match headers size");
+            }
             PdfPTable table = this.createDataTable(headers.length);
             this.addTableHeaders(table, headers);
-            this.addTableRows(table, rows);
+            this.addTableRows(table, rows, footer != null);
+            if (footer != null) {
+                this.addTableFooter(table, footer);
+            }
             document.add(table);
         });
     }
 
-    public PdfBuilder table(String[] headers, float[] widths, java.util.List<String[]> rows) {
+    public PdfBuilder table(String[] headers, float[] widths, java.util.List<String[]> rows, String[] footer) {
         return this.add("table", () -> {
             this.validateTableInput(headers, rows);
             this.validateColumnWidths(headers, widths);
+            if (footer != null && footer.length != headers.length) {
+                throw new IllegalArgumentException("table footer size must match headers size");
+            }
             PdfPTable table = new PdfPTable(widths);
             table.setWidthPercentage(100);
-            table.setSpacingBefore(5);
-            table.setSpacingAfter(5);
+            table.setSpacingBefore(4);
+            table.setSpacingAfter(8);
             this.addTableHeaders(table, headers);
-            this.addTableRows(table, rows);
+            this.addTableRows(table, rows, footer != null);
+            if (footer != null) {
+                this.addTableFooter(table, footer);
+            }
             document.add(table);
         });
+    }
+
+    public PdfBuilder table(String[] headers, java.util.List<String[]> rows) {
+        return this.table(headers, rows, null);
+    }
+
+    public PdfBuilder table(String[] headers, float[] widths, java.util.List<String[]> rows) {
+        return this.table(headers, widths, rows, null);
     }
 
     public PdfBuilder tableWithTotal(String[] headers, java.util.List<String[]> rows, String totalLabel, String totalValue) {
@@ -249,31 +371,68 @@ public class PdfBuilder {
             }
             PdfPTable table = this.createDataTable(headers.length);
             this.addTableHeaders(table, headers);
-            this.addTableRows(table, rows);
+            this.addTableRows(table, rows, true);
 
-            PdfPCell labelCell = new PdfPCell(new Phrase(totalLabel, FONT_BOLD));
+            // Fila de total: fondo primary-container suave, sin borde superior fuerte
+            PdfPCell labelCell = new PdfPCell(new Phrase(totalLabel, FONT_TABLE_TOTAL));
             labelCell.setColspan(headers.length - 1);
-            labelCell.setPadding(5);
+            labelCell.setPadding(10);
+            labelCell.setBorder(Rectangle.NO_BORDER);
+            labelCell.setBorderColorTop(PRIMARY);
+            labelCell.setBorderWidthTop(1.2f);
             labelCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            labelCell.setBackgroundColor(new Color(250, 250, 250));
+            labelCell.setBackgroundColor(PRIMARY_CONTAINER);
             table.addCell(labelCell);
 
-            PdfPCell valueCell = new PdfPCell(new Phrase(totalValue, FONT_BOLD));
-            valueCell.setPadding(5);
-            valueCell.setBackgroundColor(new Color(250, 250, 250));
+            PdfPCell valueCell = new PdfPCell(new Phrase(totalValue, FONT_TABLE_TOTAL));
+            valueCell.setPadding(10);
+            valueCell.setBorder(Rectangle.NO_BORDER);
+            valueCell.setBorderColorTop(PRIMARY);
+            valueCell.setBorderWidthTop(1.2f);
+            valueCell.setBackgroundColor(PRIMARY_CONTAINER);
             table.addCell(valueCell);
 
             document.add(table);
         });
     }
 
+    // =========================================================================
+    // FIRMAS
+    // =========================================================================
+
     public PdfBuilder signatureLine(String label) {
         return this.add("signature", () -> {
-            addStamp();
-            Paragraph p = new Paragraph();
-            p.add(new Chunk("_".repeat(40) + "\n", FONT_NORMAL));
-            p.add(new Chunk(label, FONT_SMALL));
-            document.add(p);
+            PdfPTable wrapper = new PdfPTable(1);
+            wrapper.setWidthPercentage(100);
+            wrapper.setKeepTogether(true);
+            wrapper.setSpacingBefore(8);
+
+            PdfPCell cell = this.noBorderCell();
+
+            // Sello
+            try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(STAMP_PATH)) {
+                if (is != null) {
+                    Image stamp = Image.getInstance(is.readAllBytes());
+                    stamp.scaleToFit(80, 80);
+                    stamp.setAlignment(Element.ALIGN_LEFT);
+                    cell.addElement(stamp);
+                }
+            } catch (Exception e) {
+                throw this.onError("loading stamp", e);
+            }
+
+            // Línea fina
+            Paragraph rule = new Paragraph();
+            rule.add(new Chunk(new LineSeparator(0.6f, 100f, OUTLINE, Element.ALIGN_LEFT, -2f)));
+            cell.addElement(rule);
+
+            // Nombre
+            Paragraph p = new Paragraph(label, FONT_SMALL);
+            p.setSpacingBefore(2);
+            cell.addElement(p);
+
+            wrapper.addCell(cell);
+            document.add(wrapper);
         });
     }
 
@@ -299,7 +458,8 @@ public class PdfBuilder {
             addStampToCell(rightCell);
             Paragraph right = new Paragraph();
             right.setAlignment(Element.ALIGN_RIGHT);
-            right.add(new Chunk("_".repeat(30) + "\n", FONT_NORMAL));
+            right.add(thinRuleChunk(120f));
+            right.add(new Chunk("\n", FONT_SMALL));
             right.add(new Chunk(rightLabel, FONT_SMALL));
             rightCell.addElement(right);
             table.addCell(rightCell);
@@ -330,32 +490,6 @@ public class PdfBuilder {
         });
     }
 
-    private void addStamp() {
-        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(STAMP_PATH)) {
-            if (is != null) {
-                Image stamp = Image.getInstance(is.readAllBytes());
-                stamp.scaleToFit(80, 80);
-                stamp.setAlignment(Element.ALIGN_LEFT);
-                document.add(stamp);
-            }
-        } catch (Exception e) {
-            throw this.onError("loading stamp", e);
-        }
-    }
-
-    private void addStampToCell(PdfPCell cell) {
-        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(STAMP_PATH)) {
-            if (is != null) {
-                Image stamp = Image.getInstance(is.readAllBytes());
-                stamp.scaleToFit(80, 80);
-                stamp.setAlignment(Element.ALIGN_RIGHT);
-                cell.addElement(stamp);
-            }
-        } catch (Exception e) {
-            throw this.onError("loading stamp", e);
-        }
-    }
-
     public PdfBuilder twoColumnSignature(String leftLabel, String rightLabel) {
         return this.add("signature lines", () -> {
             document.add(Chunk.NEWLINE);
@@ -384,6 +518,10 @@ public class PdfBuilder {
         return outputStream.toByteArray();
     }
 
+    // =========================================================================
+    // INTERNAL HELPERS
+    // =========================================================================
+
     private PdfBuilder add(String action, DocumentAction runnable) {
         try {
             runnable.run();
@@ -403,30 +541,66 @@ public class PdfBuilder {
         }
     }
 
+    /**
+     * Tabla "moderna": sin bordes verticales, sólo separadores horizontales finos.
+     * Padding generoso y filas con ritmo visual claro.
+     */
     private PdfPTable createDataTable(int columns) {
         PdfPTable table = new PdfPTable(columns);
         table.setWidthPercentage(100);
-        table.setSpacingBefore(5);
-        table.setSpacingAfter(5);
+        table.setSpacingBefore(4);
+        table.setSpacingAfter(8);
         return table;
     }
 
     private void addTableHeaders(PdfPTable table, String[] headers) {
         for (String h : headers) {
-            PdfPCell cell = new PdfPCell(new Phrase(h, FONT_BOLD));
-            cell.setBackgroundColor(HEADER_BG);
-            cell.setPadding(5);
+            PdfPCell cell = new PdfPCell(new Phrase(h.toUpperCase(), FONT_TABLE_HEAD));
+            cell.setPaddingTop(8);
+            cell.setPaddingBottom(8);
+            cell.setPaddingLeft(10);
+            cell.setPaddingRight(10);
+            cell.setBorder(Rectangle.BOTTOM);
+            cell.setBorderColorBottom(OUTLINE);
+            cell.setBorderWidthBottom(1.2f);
+            cell.setBackgroundColor(Color.WHITE);
             table.addCell(cell);
         }
     }
 
-    private void addTableRows(PdfPTable table, java.util.List<String[]> rows) {
-        for (String[] row : rows) {
+    private void addTableRows(PdfPTable table, java.util.List<String[]> rows, boolean hasFooter) {
+        for (int r = 0; r < rows.size(); r++) {
+            String[] row = rows.get(r);
+            boolean lastRow = (r == rows.size() - 1);
+            boolean noBottomBorder = lastRow && !hasFooter;
+            Color bg = (r % 2 == 1) ? SURFACE_LOW : Color.WHITE;
             for (String value : row) {
-                PdfPCell cell = new PdfPCell(new Phrase(value != null ? value : "", FONT_NORMAL));
-                cell.setPadding(5);
+                PdfPCell cell = new PdfPCell(new Phrase(value != null ? value : "", FONT_TABLE_CELL));
+                cell.setPaddingTop(5);
+                cell.setPaddingBottom(5);
+                cell.setPaddingLeft(10);
+                cell.setPaddingRight(10);
+                cell.setBackgroundColor(bg);
+                cell.setBorder(noBottomBorder ? Rectangle.NO_BORDER : Rectangle.BOTTOM);
+                cell.setBorderColorBottom(OUTLINE_VARIANT);
+                cell.setBorderWidthBottom(0.5f);
                 table.addCell(cell);
             }
+        }
+    }
+
+    private void addTableFooter(PdfPTable table, String[] footer) {
+        for (String value : footer) {
+            PdfPCell cell = new PdfPCell(new Phrase(value != null ? value : "", FONT_TABLE_FOOT));
+            cell.setPaddingTop(8);
+            cell.setPaddingBottom(8);
+            cell.setPaddingLeft(10);
+            cell.setPaddingRight(10);
+            cell.setBackgroundColor(SURFACE_LOW);
+            cell.setBorder(Rectangle.TOP);
+            cell.setBorderColorTop(OUTLINE);
+            cell.setBorderWidthTop(1.2f);
+            table.addCell(cell);
         }
     }
 
@@ -472,8 +646,26 @@ public class PdfBuilder {
         try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(LOGO_PATH)) {
             if (is != null) {
                 Image logo = Image.getInstance(is.readAllBytes());
-                logo.scaleToFit(80, 80);
-                cell.addElement(logo);
+                logo.scaleToFit(60, 60); // 66% del tamaño anterior (90 -> 60)
+
+                PdfPTable inner = new PdfPTable(new float[]{35, 65});
+                inner.setWidthPercentage(100);
+
+                PdfPCell logoCell = this.noBorderCell();
+                logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                logoCell.addElement(logo);
+                inner.addCell(logoCell);
+
+                PdfPCell nameCell = this.noBorderCell();
+                nameCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                Paragraph names = new Paragraph();
+                names.setLeading(12);
+                names.add(new Chunk(COMPANY_NAME + "\n", FONT_HEADER_BOLD));
+                names.add(new Chunk(COMPANY_OWNER, FONT_HEADER));
+                nameCell.addElement(names);
+                inner.addCell(nameCell);
+
+                cell.addElement(inner);
             }
         } catch (Exception e) {
             throw this.onError("loading logo", e);
@@ -484,8 +676,10 @@ public class PdfBuilder {
     private PdfPCell createInfoCell() {
         PdfPCell cell = this.noBorderCell();
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         Paragraph info = new Paragraph();
-        info.add(new Chunk(COMPANY_NAME + "\n", FONT_BOLD));
+        info.setAlignment(Element.ALIGN_RIGHT);
+        info.setLeading(13);
         info.add(new Chunk("NIF: " + COMPANY_NIF + "\n", FONT_HEADER));
         info.add(new Chunk(COMPANY_ADDRESS + "\n", FONT_HEADER));
         info.add(new Chunk("Tel: " + COMPANY_PHONE + "\n", FONT_HEADER));
@@ -506,7 +700,8 @@ public class PdfBuilder {
         PdfPCell cell = this.noBorderCell();
         Paragraph p = new Paragraph();
         p.setAlignment(alignment);
-        p.add(new Chunk("_".repeat(30) + "\n", FONT_NORMAL));
+        p.add(thinRuleChunk(140f));
+        p.add(new Chunk("\n", FONT_SMALL));
         p.add(new Chunk(label, FONT_SMALL));
         cell.addElement(p);
         return cell;
@@ -530,9 +725,58 @@ public class PdfBuilder {
         if (signature.signature() != null && !signature.signature().isBlank()) {
             p.add(new Chunk(signature.signature() + "\n", FONT_SIGNATURE));
         }
-        p.add(new Chunk("_".repeat(30) + "\n", FONT_NORMAL));
+        p.add(thinRuleChunk(140f));
+        p.add(new Chunk("\n", FONT_SMALL));
         p.add(new Chunk(signature.label(), FONT_SMALL));
         return p;
+    }
+
+    /**
+     * Devuelve un Chunk que dibuja una línea fina del color outline,
+     * en lugar de los underscores "_______".
+     */
+    private Chunk thinRuleChunk(float width) {
+        LineSeparator sep = new LineSeparator(0.6f, width / 100f * 100f, OUTLINE, Element.ALIGN_LEFT, -2f);
+        // forzamos ancho aproximado mediante la línea de texto
+        return new Chunk(sep);
+    }
+
+    /** Dibuja una línea horizontal de ancho fijo en color outline. */
+    private void thinRule(float width) {
+        try {
+            Paragraph p = new Paragraph();
+            LineSeparator sep = new LineSeparator(0.6f, 100f, OUTLINE, Element.ALIGN_LEFT, -2f);
+            p.add(new Chunk(sep));
+            document.add(p);
+        } catch (DocumentException e) {
+            throw this.onError("drawing rule", e);
+        }
+    }
+
+    private void addStamp() {
+        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(STAMP_PATH)) {
+            if (is != null) {
+                Image stamp = Image.getInstance(is.readAllBytes());
+                stamp.scaleToFit(80, 80);
+                stamp.setAlignment(Element.ALIGN_LEFT);
+                document.add(stamp);
+            }
+        } catch (Exception e) {
+            throw this.onError("loading stamp", e);
+        }
+    }
+
+    private void addStampToCell(PdfPCell cell) {
+        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(STAMP_PATH)) {
+            if (is != null) {
+                Image stamp = Image.getInstance(is.readAllBytes());
+                stamp.scaleToFit(80, 80);
+                stamp.setAlignment(Element.ALIGN_RIGHT);
+                cell.addElement(stamp);
+            }
+        } catch (Exception e) {
+            throw this.onError("loading stamp", e);
+        }
     }
 
     private BadGatewayException onError(String action, Exception e) {
@@ -554,7 +798,9 @@ public class PdfBuilder {
         }
     }
 
-    // === ColumnBuilder ===
+    // =========================================================================
+    // ColumnBuilder
+    // =========================================================================
     public static class ColumnBuilder {
         private final PdfPCell cell;
 
@@ -563,7 +809,9 @@ public class PdfBuilder {
         }
 
         public ColumnBuilder paragraph(String text) {
-            cell.addElement(new Paragraph(text, FONT_NORMAL));
+            Paragraph p = new Paragraph(text, FONT_NORMAL);
+            p.setLeading(14);
+            cell.addElement(p);
             return this;
         }
 
@@ -574,12 +822,18 @@ public class PdfBuilder {
         public ColumnBuilder paragraphBold(String text, int alignment) {
             Paragraph p = new Paragraph(text, FONT_BOLD);
             p.setAlignment(alignment);
+            p.setLeading(14);
             cell.addElement(p);
             return this;
         }
 
         public ColumnBuilder section(String text) {
-            cell.addElement(new Paragraph(text, FONT_SECTION));
+            Paragraph p = new Paragraph();
+            Chunk c = new Chunk(text.toUpperCase(), FONT_KICKER);
+            c.setCharacterSpacing(1.2f);
+            p.add(c);
+            p.setSpacingAfter(4);
+            cell.addElement(p);
             return this;
         }
 
@@ -590,22 +844,29 @@ public class PdfBuilder {
 
         public ColumnBuilder list(java.util.List<String> items) {
             List list = new List(List.UNORDERED);
-            list.setListSymbol("-");
-            items.forEach(item -> list.add(new ListItem(item + ".", FONT_NORMAL)));
+            list.setListSymbol(new Chunk("•  ", new Font(BASE_FONT_BOLD, 10f, Font.BOLD, PRIMARY)));
+            items.forEach(item -> {
+                ListItem li = new ListItem(item + ".", FONT_NORMAL);
+                li.setLeading(14);
+                list.add(li);
+            });
             cell.addElement(list);
             return this;
         }
 
         public ColumnBuilder labelValue(String label, String value) {
             Paragraph p = new Paragraph();
-            p.add(new Chunk(label + ": ", FONT_BOLD));
-            p.add(new Chunk(value != null ? value : "-", FONT_NORMAL));
+            p.setLeading(14);
+            p.add(new Chunk(label + "  ", FONT_MUTED));
+            p.add(new Chunk(value != null ? value : "—", FONT_BOLD));
             cell.addElement(p);
             return this;
         }
     }
 
-    // === PageFooterEvent ===
+    // =========================================================================
+    // PageFooterEvent
+    // =========================================================================
     private static class PageFooterEvent extends PdfPageEventHelper {
 
         private PdfTemplate totalPages;
@@ -621,22 +882,26 @@ public class PdfBuilder {
             float footerTextY = document.bottomMargin() - FOOTER_TEXT_OFFSET;
             float footerSeparatorY = document.bottomMargin() - FOOTER_SEPARATOR_OFFSET;
 
-            // Línea
-            cb.setLineWidth(0.5f);
+            // Línea ultra-fina con color suave
+            cb.saveState();
+            cb.setLineWidth(0.4f);
+            cb.setColorStroke(OUTLINE_VARIANT);
             cb.moveTo(document.leftMargin(), footerSeparatorY);
             cb.lineTo(document.right(), footerSeparatorY);
             cb.stroke();
+            cb.restoreState();
 
             // Contacto centrado
-            Phrase footer = new Phrase(COMPANY_EMAIL + "  |  " + COMPANY_PHONE, FONT_SMALL);
+            Phrase footer = new Phrase(COMPANY_EMAIL + "  ·  " + COMPANY_PHONE, FONT_SMALL);
             ColumnText.showTextAligned(cb, Element.ALIGN_CENTER, footer,
                     (document.right() + document.leftMargin()) / 2, footerTextY, 0);
 
             // Número de página a la derecha
             String pageText = "Página " + writer.getPageNumber() + " de ";
-            float pageTextWidth = BASE_FONT_HELVETICA.getWidthPoint(pageText, 8);
+            float pageTextWidth = BASE_FONT.getWidthPoint(pageText, 8);
             cb.beginText();
-            cb.setFontAndSize(BASE_FONT_HELVETICA, 8);
+            cb.setFontAndSize(BASE_FONT, 8);
+            cb.setColorFill(ON_SURFACE_VARIANT);
             cb.setTextMatrix(document.right() - pageTextWidth - 20, footerTextY);
             cb.showText(pageText);
             cb.endText();
@@ -647,10 +912,10 @@ public class PdfBuilder {
         public void onCloseDocument(PdfWriter writer, Document document) {
             int totalPageCount = Math.max(1, writer.getPageNumber() - 1);
             totalPages.beginText();
-            totalPages.setFontAndSize(BASE_FONT_HELVETICA, 8);
+            totalPages.setFontAndSize(BASE_FONT, 8);
+            totalPages.setColorFill(ON_SURFACE_VARIANT);
             totalPages.showText(String.valueOf(totalPageCount));
             totalPages.endText();
         }
     }
 }
-
