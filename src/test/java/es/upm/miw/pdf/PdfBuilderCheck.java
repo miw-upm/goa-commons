@@ -53,7 +53,23 @@ class PdfBuilderCheck {
                         "Tramitación de la venta de las viviendas de la herencia con la inmobiliaria"
                 ))
 
-                .section("Descuentos aplicados a la Hoja de Encargo")
+                .section("Importe de la presente factura")
+                .table(
+                        new String[]{"Concepto", "Importe"},
+                        List.of(
+                                new String[]{"Base imponible", formatEuro(new BigDecimal("4400"))},
+                                new String[]{"IVA (21 %)",     formatEuro(new BigDecimal("1050"))}
+                        ),
+                        new String[]{"TOTAL", formatEuro(new BigDecimal("5450"))}
+                )
+                .paragraphBold("PENDIENTE DE INGRESAR: " + formatEuro(new BigDecimal("2400")))
+                .paragraph("Ruego que ingrese en la cuenta bancaria: ES00 1111 2222 3333 4444 5555")
+                .signatureLine("Doña Nuria Ocaña Pérez")
+
+
+                .pageBreak()
+                .section("Información detallada")
+                .paragraphBold("Descuentos aplicados a la Hoja de Encargo")
                 .table(
                         new String[]{"Base original", "Descuentos", "Base final"},
                         List.of(
@@ -64,27 +80,15 @@ class PdfBuilderCheck {
                                 new String[]{formatEuro(new BigDecimal("5000")), formatEuro(new BigDecimal("600")), formatEuro(new BigDecimal("4400")) }
 
                 )
-                .section("Ingresos asociados a la Hoja de Encargo, facturados aqui")
+                .paragraphBold("Ingresos asociados a la Hoja de Encargo, facturados aqui")
                 .table(
                         new String[]{"Cliente", "Fecha", "Importe", "Tipo de Ingreso"},
                         List.of(
                                 new String[]{"Jesús Martínez Ruiz", "miércoles, 27 de mayo de 2026", formatEuro(new BigDecimal("400")),  "TRANSFER"},
                                 new String[]{"Jesús Martínez Ruiz", "miércoles, 27 de mayo de 2026", formatEuro(new BigDecimal("5050")), "BIZUM"}
-                        )
-                )
-
-                .section("Importe de la presente factura")
-                .tableWithTotal(
-                        new String[]{"Concepto", "Importe"},
-                        List.of(
-                                new String[]{"Base imponible", formatEuro(new BigDecimal("4400"))},
-                                new String[]{"IVA (21 %)",     formatEuro(new BigDecimal("1050"))}
                         ),
-                        "TOTAL",
-                        formatEuro(new BigDecimal("5450"))
+                        new String[]{"TOTAL", "", formatEuro(new BigDecimal("5450")), ""}
                 )
-
-                .signatureLine("Doña Nuria Ocaña Pérez")
 
                 .footer()
                 .build();

@@ -40,11 +40,11 @@ public class PdfBuilder {
     private static final BaseFont BASE_FONT      = requiredBaseFont(BaseFont.HELVETICA);
     private static final BaseFont BASE_FONT_BOLD = requiredBaseFont(BaseFont.HELVETICA_BOLD);
 
-    private static final Font FONT_NORMAL      = new Font(BASE_FONT,      9f, Font.NORMAL, ON_SURFACE);
-    private static final Font FONT_BOLD        = new Font(BASE_FONT_BOLD, 9f, Font.BOLD,   ON_SURFACE);
+    private static final Font FONT_NORMAL      = new Font(BASE_FONT,      8.5f, Font.NORMAL, ON_SURFACE);
+    private static final Font FONT_BOLD        = new Font(BASE_FONT_BOLD, 8.5f, Font.BOLD,   ON_SURFACE);
     private static final Font FONT_MUTED       = new Font(BASE_FONT,       8f, Font.NORMAL, ON_SURFACE_VARIANT);
-    private static final Font FONT_TITLE       = new Font(BASE_FONT_BOLD, 14f, Font.BOLD,   ON_SURFACE);
-    private static final Font FONT_KICKER      = new Font(BASE_FONT_BOLD,  8f, Font.BOLD, PRIMARY);
+    private static final Font FONT_TITLE       = new Font(BASE_FONT_BOLD, 11f, Font.BOLD,   ON_SURFACE);
+    private static final Font FONT_KICKER      = new Font(BASE_FONT_BOLD,  9f, Font.BOLD, PRIMARY);
     private static final Font FONT_SECTION     = new Font(BASE_FONT_BOLD, 10f, Font.BOLD,   ON_SURFACE);
     private static final Font FONT_SMALL       = new Font(BASE_FONT,       7f, Font.NORMAL, ON_SURFACE_VARIANT);
     private static final Font FONT_HEADER_BOLD = new Font(BASE_FONT_BOLD, 10f, Font.BOLD,   ON_SURFACE);
@@ -139,7 +139,7 @@ public class PdfBuilder {
             p.setSpacingAfter(2);
             document.add(p);
             // Filete acento dorado bajo el título
-            this.accentRule(PRIMARY, 150f, 1f);
+            this.accentRule(PRIMARY, 120f, 1f);
         });
     }
 
@@ -562,7 +562,7 @@ public class PdfBuilder {
             cell.setPaddingRight(10);
             cell.setBorder(Rectangle.BOTTOM);
             cell.setBorderColorBottom(OUTLINE);
-            cell.setBorderWidthBottom(1.2f);
+            cell.setBorderWidthBottom(0.8f);
             cell.setBackgroundColor(Color.WHITE);
             table.addCell(cell);
         }
@@ -599,7 +599,7 @@ public class PdfBuilder {
             cell.setBackgroundColor(SURFACE_LOW);
             cell.setBorder(Rectangle.TOP);
             cell.setBorderColorTop(OUTLINE);
-            cell.setBorderWidthTop(1.2f);
+            cell.setBorderWidthTop(0.6f);
             table.addCell(cell);
         }
     }
