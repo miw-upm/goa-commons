@@ -50,7 +50,7 @@ public class PdfBuilder {
     private static final Font FONT_HEADER_BOLD = new Font(BASE_FONT_BOLD, 10f, Font.BOLD,   ON_SURFACE);
     private static final Font FONT_HEADER      = new Font(BASE_FONT,       8f, Font.NORMAL, ON_SURFACE_VARIANT);
     private static final Font FONT_TABLE_HEAD  = new Font(BASE_FONT_BOLD,  8f, Font.BOLD, ON_SURFACE_VARIANT);
-    private static final Font FONT_TABLE_FOOT = new Font(BASE_FONT_BOLD, 8f, Font.BOLD, ON_SURFACE);
+    private static final Font FONT_TABLE_FOOT = new Font(BASE_FONT_BOLD, 7.5f, Font.BOLD, ON_SURFACE);
     private static final Font FONT_TABLE_CELL  = new Font(BASE_FONT,       7f, Font.NORMAL, ON_SURFACE);
     private static final Font FONT_TABLE_CELL_BOLD = new Font(BASE_FONT_BOLD, 7f, Font.BOLD, ON_SURFACE);
     private static final Font FONT_TABLE_TOTAL = new Font(BASE_FONT_BOLD, 8.5f, Font.BOLD, PRIMARY);
@@ -334,48 +334,53 @@ public class PdfBuilder {
     // TABLAS
     // =========================================================================
 
-    public PdfBuilder table(String[] headers, java.util.List<String[]> rows, String[] footer) {
+    public PdfBuilder table(String[] headers, java.util.List<String[]> rows, String[]... footers) {
         return this.add("table", () -> {
             this.validateTableInput(headers, rows);
-            if (footer != null && footer.length != headers.length) {
-                throw new IllegalArgumentException("table footer size must match headers size");
-            }
+            java.util.List<String[]> validFooters = this.validateFooters(headers, footers);
             PdfPTable table = this.createDataTable(headers.length);
             this.addTableHeaders(table, headers);
-            this.addTableRows(table, rows, footer != null);
-            if (footer != null) {
-                this.addTableFooter(table, footer);
+            this.addTableRows(table, rows, !validFooters.isEmpty());
+            for (int i = 0; i < validFooters.size(); i++) {
+                this.addTableFooter(table, validFooters.get(i), i == 0);
             }
             document.add(table);
         });
     }
 
-    public PdfBuilder table(String[] headers, float[] widths, java.util.List<String[]> rows, String[] footer) {
+    public PdfBuilder table(String[] headers, float[] widths, java.util.List<String[]> rows, String[]... footers) {
         return this.add("table", () -> {
             this.validateTableInput(headers, rows);
             this.validateColumnWidths(headers, widths);
-            if (footer != null && footer.length != headers.length) {
-                throw new IllegalArgumentException("table footer size must match headers size");
-            }
+            java.util.List<String[]> validFooters = this.validateFooters(headers, footers);
             PdfPTable table = new PdfPTable(widths);
             table.setWidthPercentage(100);
             table.setSpacingBefore(4);
             table.setSpacingAfter(8);
             this.addTableHeaders(table, headers);
-            this.addTableRows(table, rows, footer != null);
-            if (footer != null) {
-                this.addTableFooter(table, footer);
+            this.addTableRows(table, rows, !validFooters.isEmpty());
+            for (int i = 0; i < validFooters.size(); i++) {
+                this.addTableFooter(table, validFooters.get(i), i == 0);
             }
             document.add(table);
         });
     }
 
-    public PdfBuilder table(String[] headers, java.util.List<String[]> rows) {
-        return this.table(headers, rows, null);
-    }
-
-    public PdfBuilder table(String[] headers, float[] widths, java.util.List<String[]> rows) {
-        return this.table(headers, widths, rows, null);
+    private java.util.List<String[]> validateFooters(String[] headers, String[]... footers) {
+        java.util.List<String[]> valid = new java.util.ArrayList<>();
+        if (footers == null) {
+            return valid;
+        }
+        for (String[] footer : footers) {
+            if (footer == null) {
+                continue;
+            }
+            if (footer.length != headers.length) {
+                throw new IllegalArgumentException("table footer size must match headers size");
+            }
+            valid.add(footer);
+        }
+        return valid;
     }
 
     public PdfBuilder tableWithTotal(String[] headers, java.util.List<String[]> rows, String totalLabel, String totalValue) {
@@ -604,7 +609,7 @@ public class PdfBuilder {
         }
     }
 
-    private void addTableFooter(PdfPTable table, String[] footer) {
+    private void addTableFooter(PdfPTable table, String[] footer, boolean isFirstFooter) {
         for (String value : footer) {
             PdfPCell cell = new PdfPCell(new Phrase(value != null ? value : "", FONT_TABLE_FOOT));
             cell.setPaddingTop(8);
@@ -612,9 +617,15 @@ public class PdfBuilder {
             cell.setPaddingLeft(10);
             cell.setPaddingRight(10);
             cell.setBackgroundColor(SURFACE_LOW);
-            cell.setBorder(Rectangle.TOP);
-            cell.setBorderColorTop(OUTLINE);
-            cell.setBorderWidthTop(0.6f);
+            if (isFirstFooter) {
+                cell.setBorder(Rectangle.TOP);
+                cell.setBorderColorTop(OUTLINE);
+                cell.setBorderWidthTop(0.6f);
+            } else {
+                cell.setBorder(Rectangle.TOP);
+                cell.setBorderColorTop(OUTLINE_VARIANT);
+                cell.setBorderWidthTop(0.5f);
+            }
             table.addCell(cell);
         }
     }
