@@ -86,7 +86,8 @@ class PdfBuilderCheck {
                                 new String[]{"Jesús Martínez Ruiz", "miércoles, 27 de mayo de 2026", formatEuro(new BigDecimal("400")),  "TRANSFER"},
                                 new String[]{"Jesús Martínez Ruiz", "miércoles, 27 de mayo de 2026", formatEuro(new BigDecimal("5050")), "BIZUM"}
                         ),
-                        new String[]{"TOTAL", "", formatEuro(new BigDecimal("5450")), ""}
+                        new String[]{"TOTAL", "", formatEuro(new BigDecimal("5450")), ""},
+                        new String[]{"TOTAL (60%)", "", formatEuro(new BigDecimal("5450")), ""}
                 )
                 .space(2)
 
