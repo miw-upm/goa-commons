@@ -140,8 +140,21 @@ public class PdfBuilder {
             p.setSpacingAfter(2);
             document.add(p);
             // Filete acento dorado bajo el título
-            this.accentRule(PRIMARY, 120f, 1f);
+            this.accentRule(PRIMARY, 250f, 1f);
         });
+    }
+
+    /** Pequeña barra de color (acento), normalmente bajo títulos. */
+    private void accentRule(Color color, float width, float thickness) {
+        PdfContentByte cb = writer.getDirectContent();
+        float y = writer.getVerticalPosition(true) - 6;
+        cb.saveState();
+        cb.setLineWidth(thickness);
+        cb.setColorStroke(color);
+        cb.moveTo(document.leftMargin(), y);
+        cb.lineTo(document.leftMargin() + width, y);
+        cb.stroke();
+        cb.restoreState();
     }
 
     public PdfBuilder section(String text) {
@@ -191,18 +204,7 @@ public class PdfBuilder {
         return this;
     }
 
-    /** Pequeña barra de color (acento), normalmente bajo títulos. */
-    private void accentRule(Color color, float width, float thickness) {
-        PdfContentByte cb = writer.getDirectContent();
-        float y = writer.getVerticalPosition(true) - 6;
-        cb.saveState();
-        cb.setLineWidth(thickness);
-        cb.setColorStroke(color);
-        cb.moveTo(document.leftMargin(), y);
-        cb.lineTo(document.leftMargin() + width, y);
-        cb.stroke();
-        cb.restoreState();
-    }
+
 
     public PdfBuilder space() {
         return this.space(1);
@@ -476,12 +478,14 @@ public class PdfBuilder {
             PdfPCell rightCell = this.noBorderCell();
             rightCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             addStampToCell(rightCell);
+
             Paragraph right = new Paragraph();
             right.setAlignment(Element.ALIGN_RIGHT);
-            right.add(thinRuleChunk(120f));
+            right.add(new Chunk("_________________________________________", FONT_SMALL));
             right.add(new Chunk("\n", FONT_SMALL));
             right.add(new Chunk(rightLabel, FONT_SMALL));
             rightCell.addElement(right);
+
             table.addCell(rightCell);
 
             document.add(table);
@@ -751,7 +755,7 @@ public class PdfBuilder {
         if (signature.signature() != null && !signature.signature().isBlank()) {
             p.add(new Chunk(signature.signature() + "\n", FONT_SIGNATURE));
         }
-        p.add(thinRuleChunk(140f));
+        p.add(new Chunk("_________________________________________", FONT_SMALL));
         p.add(new Chunk("\n", FONT_SMALL));
         p.add(new Chunk(signature.label(), FONT_SMALL));
         return p;
