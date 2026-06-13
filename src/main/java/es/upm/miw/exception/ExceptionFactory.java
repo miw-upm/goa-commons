@@ -9,11 +9,11 @@ public final class ExceptionFactory {
         return switch (error) {
             case "BadGatewayException"        -> new BadGatewayException(detail);
             case "BadRequestException"        -> new BadRequestException(detail);
+            case "ClientBusinessException"  -> new ClientBusinessException(detail);
             case "ConflictException"          -> new ConflictException(detail);
             case "ForbiddenException"         -> new ForbiddenException(detail);
             case "InfrastructureException"    -> new InfrastructureException(detail);
             case "InternalServerException"    -> new InternalServerException(detail);
-            case "InvalidTransitionException" -> new InvalidTransitionException(detail);
             case "NotFoundException"          -> new NotFoundException(detail);
             case "UnauthorizedException"      -> new UnauthorizedException(detail);
 
